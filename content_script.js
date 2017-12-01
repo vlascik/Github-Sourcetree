@@ -1,15 +1,14 @@
 function genCloneButton(protocol, cloneUrl) {
-    var branch = $('.file-navigation').find('.js-menu-target').attr('data-ref');
+    var branch = $('.file-navigation').find('.js-url-field').attr('data-ref');
     var cloneURL = getCloneURL(branch, cloneUrl);
-
+    
     var button = $('<a>').attr({
         "href": cloneURL,
-        "data-url": cloneURL,
-        "class": $($('.only-with-full-nav').find('a:contains("lone")')[0]).attr('class')
+        "class": "btn btn-sm tooltipped tooltipped-s tooltipped-multiline BtnGroup-item",
+        "aria-label": "Open in SourceTree"
     });
     button.append($('<img />').css({"margin-right": "10px"}).attr("src", chrome.extension.getURL('icon/' + protocol + '.png')));
-    button.append($('<span />').text('Clone in ST (' + protocol.toUpperCase() + ')'));
-    button.appendTo('.only-with-full-nav');
+    return button;
 }
 
 function getCloneURL(branch, cloneUrl) {
@@ -18,16 +17,19 @@ function getCloneURL(branch, cloneUrl) {
 }
 
 // Create a new section for Sourcetree buttons:
-$('.only-with-full-nav').append(
-    $('<hr><h3><strong>Clone in SourceTree</strong></h3>')
-);
+var btnGroup = $('<div>').attr({ "class": "BtnGroup float-right" });
+btnGroup.prependTo('.file-navigation.in-mid-page');
 
 // Generate clone buttons:
-$('.clone-url').each(function (i, urlDOM) {
-    var protocol = $(urlDOM).attr('data-protocol-type');
-
-    if (protocol.match(/(ssh|http)/)) {
-        var cloneUrl = $(urlDOM).find('input.js-url-field').val();
-        if (cloneUrl) genCloneButton(protocol, cloneUrl);
-    }
+$('.clone-options').each(function (i, urlDOM) {
+	var protocols = ['http', 'ssh'];
+	var protocol = $(urlDOM).attr('data-protocol-type') || protocols[i];
+	
+	if (protocol.match(/(ssh|http)/)) {
+	    var cloneUrl = $(urlDOM).find('input.js-url-field').val();
+	    if (cloneUrl) { 
+          var button = genCloneButton(protocol, cloneUrl);
+          btnGroup.append(button);
+	    }
+	}
 });
